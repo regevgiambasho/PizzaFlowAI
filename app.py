@@ -196,11 +196,11 @@ with tab2:
         )
 
         busy_drones = min(
-            5,
-            int(len(df) / 6)
-        )
+    3,
+    int(len(df) / 10)
+)
 
-        available_drones = 5 - busy_drones
+available_drones = 5 - busy_drones
 
         fifo_profit = int(
             total_profit * 0.85
