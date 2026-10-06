@@ -8,18 +8,30 @@ st.set_page_config(
     layout="wide"
 )
 
+# ==================================
+# Session State
+# ==================================
+
 if "orders" not in st.session_state:
     st.session_state.orders = []
 
-# ------------------------------------------------
+# ==================================
 # Functions
-# ------------------------------------------------
+# ==================================
 
-def create_order(pizza_count, toppings, distance, drink):
+def create_order(
+    pizza_count,
+    toppings,
+    distance,
+    drink
+):
+    revenue = pizza_count * (
+        60 + toppings * 10
+    )
 
-    revenue = pizza_count * (60 + toppings * 10)
-
-    cost = pizza_count * (14 + toppings * 2)
+    cost = pizza_count * (
+        14 + toppings * 2
+    )
 
     profit = revenue - cost
 
@@ -37,53 +49,85 @@ def create_order(pizza_count, toppings, distance, drink):
     )
 
     return {
-        "OrderID": len(st.session_state.orders) + 1,
-        "Revenue": revenue,
-        "Profit": profit,
-        "ETA": eta,
-        "Priority": priority,
-        "Distance": distance,
-        "Drink": drink
+        "OrderID":
+            len(st.session_state.orders) + 1,
+
+        "Revenue":
+            revenue,
+
+        "Profit":
+            profit,
+
+        "ETA":
+            eta,
+
+        "Priority":
+            priority,
+
+        "Distance":
+            distance,
+
+        "Drink":
+            drink
     }
 
 
-def run_demo():
+def generate_city_event():
 
     st.session_state.orders = []
 
     for _ in range(30):
 
-        pizza_count = random.randint(1, 5)
-
-        toppings = random.randint(0, 3)
-
-        distance = random.randint(1, 15)
-
-        st.session_state.orders.append(
-            create_order(
-                pizza_count,
-                toppings,
-                distance,
-                "None"
-            )
+        pizza_count = random.randint(
+            1,
+            5
         )
 
+        toppings = random.randint(
+            0,
+            3
+        )
 
-# ------------------------------------------------
+        distance = random.randint(
+            1,
+            15
+        )
+
+        order = create_order(
+            pizza_count,
+            toppings,
+            distance,
+            "ללא"
+        )
+
+        st.session_state.orders.append(
+            order
+        )
+
+# ==================================
 # Header
-# ------------------------------------------------
+# ==================================
 
 st.title("🍕 PizzaFlow AI")
 
 st.info(
     """
-🎬 Quick Start
+PizzaFlow AI demonstrates
+AI-based prioritization of pizza deliveries.
 
-1. Open Dashboard.
-2. Click "Run Demo Scenario".
-3. Review the AI recommendation.
-4. Compare PizzaFlow AI against FIFO.
-5. Review the business outcome summary.
+Recommended flow:
+
+1. Place orders manually
+
+OR
+
+2. Click 🎬 Run Demo Scenario
+
+3. Review AI recommendation
+
+4. Review FIFO comparison
+
+5. Review business outcome
 """
 )
 
@@ -94,9 +138,9 @@ tab1, tab2 = st.tabs(
     ]
 )
 
-# ==================================================
-# Orders
-# ==================================================
+# ==================================
+# ORDER PAGE
+# ==================================
 
 with tab1:
 
@@ -110,7 +154,7 @@ with tab1:
     )
 
     toppings = st.selectbox(
-        "Toppings",
+        "Toppings Per Pizza",
         [0, 1, 2, 3]
     )
 
@@ -130,46 +174,61 @@ with tab1:
         5
     )
 
-    if st.button("🍕 Place Order"):
+    if st.button(
+        "🍕 Place Order"
+    ):
 
-        st.session_state.orders.append(
-            create_order(
-                pizza_count,
-                toppings,
-                distance,
-                drink
-            )
+        order = create_order(
+            pizza_count,
+            toppings,
+            distance,
+            drink
         )
 
-        st.success("Order Created")
+        st.session_state.orders.append(
+            order
+        )
 
-# ==================================================
-# Dashboard
-# ==================================================
+        st.success(
+            "Order Created"
+        )
+
+# ==================================
+# DASHBOARD
+# ==================================
 
 with tab2:
 
-    st.header("📊 Operations Dashboard")
+    st.header("Operations Dashboard")
 
-    b1, b2, b3 = st.columns(3)
+    c1, c2, c3 = st.columns(3)
 
-    with b1:
-        if st.button("🎬 Run Demo Scenario"):
-            run_demo()
+    with c1:
 
-    with b2:
-        if st.button("🚨 City Event"):
-            run_demo()
+        if st.button(
+            "🎬 Run Demo Scenario"
+        ):
+            generate_city_event()
 
-    with b3:
-        if st.button("🗑 Reset Simulation"):
+    with c2:
+
+        if st.button(
+            "🚨 City Event"
+        ):
+            generate_city_event()
+
+    with c3:
+
+        if st.button(
+            "🗑️ Reset Simulation"
+        ):
             st.session_state.orders = []
             st.rerun()
 
     if len(st.session_state.orders) == 0:
 
         st.warning(
-            "No active orders. Run the demo scenario."
+            "No orders available."
         )
 
     else:
@@ -185,22 +244,13 @@ with tab2:
 
         best_order = df.iloc[0]
 
-        total_profit = df["Profit"].sum()
-
-        avg_eta = df["ETA"].mean()
-
-        oven_c = (
-            "ON"
-            if len(df) > 20
-            else "OFF"
+        total_profit = float(
+            df["Profit"].sum()
         )
 
-        busy_drones = min(
-            5,
-            int(len(df) / 6)
+        avg_eta = float(
+            df["ETA"].mean()
         )
-
-        available_drones = 5 - busy_drones
 
         fifo_profit = int(
             total_profit * 0.85
@@ -211,17 +261,33 @@ with tab2:
             1
         )
 
+        oven_c = (
+            "ON"
+            if len(df) > 20
+            else "OFF"
+        )
+
+        drones = max(
+            0,
+            5 - int(
+                len(df) / 6
+            )
+        )
+
         improvement = round(
             (
-                total_profit
-                - fifo_profit
+                total_profit -
+                fifo_profit
             )
-            / fifo_profit
+            /
+            fifo_profit
             * 100,
             1
         )
 
+        # ===========================
         # KPI
+        # ===========================
 
         k1, k2, k3, k4, k5, k6 = st.columns(6)
 
@@ -236,12 +302,12 @@ with tab2:
         )
 
         k3.metric(
-            "Average ETA",
+            "ETA",
             f"{avg_eta:.1f}"
         )
 
         k4.metric(
-            "🤖 AI Selected",
+            "Top Order",
             f"#{int(best_order['OrderID'])}"
         )
 
@@ -251,20 +317,16 @@ with tab2:
         )
 
         k6.metric(
-            "🚁 Available",
-            f"{available_drones}/5"
+            "🚁 Drones",
+            f"{drones}/5"
         )
 
-        st.markdown(
-            """
-### Order Prioritization Logic
+        # ===========================
+        # Orders
+        # ===========================
 
-Orders are ranked using:
-
-**Priority = Profit ÷ ETA**
-
-Higher score = Higher priority
-"""
+        st.subheader(
+            "Prioritized Orders"
         )
 
         st.dataframe(
@@ -272,29 +334,42 @@ Higher score = Higher priority
             use_container_width=True
         )
 
-        # AI recommendation
+        # ===========================
+        # AI Recommendation
+        # ===========================
 
         st.success(
             f"""
 🤖 PizzaFlow AI selected Order #{int(best_order['OrderID'])}
 
-Priority Score: {best_order['Priority']}
+Priority Score:
+{best_order['Priority']}
 
-Expected Profit: ₪{int(best_order['Profit'])}
+Expected Profit:
+₪{int(best_order['Profit'])}
 
-Expected ETA: {best_order['ETA']} Minutes
+Expected ETA:
+{best_order['ETA']} Minutes
 """
         )
 
         st.info(
             """
-The selected order provides the highest
-Profit-to-ETA ratio while maximizing
-expected business value.
+Explainability
+
+The order was selected because it provides
+the highest Profit / ETA ratio.
+
+Priority = Profit ÷ ETA
+
+Orders are ranked from highest score
+to lowest score.
 """
         )
 
-        # FIFO comparison
+        # ===========================
+        # FIFO Comparison
+        # ===========================
 
         st.subheader(
             "📊 FIFO vs PizzaFlow AI"
@@ -354,12 +429,14 @@ expected business value.
 
         st.success(
             f"""
-🚀 PizzaFlow AI improves profitability by
+🚀 PizzaFlow AI improved profit by
 {improvement}% compared to FIFO.
 """
         )
 
+        # ===========================
         # Business Outcome
+        # ===========================
 
         st.subheader(
             "📈 Business Outcome"
@@ -367,19 +444,19 @@ expected business value.
 
         st.success(
             f"""
-✅ AI selected the highest-value order
+✅ Selected best order
 
-✅ Expected Profit:
+✅ Estimated profit:
 ₪{int(best_order['Profit'])}
 
-✅ Expected ETA:
+✅ Estimated ETA:
 {best_order['ETA']} Minutes
 
 ✅ Oven C Status:
 {oven_c}
 
 ✅ Available Drones:
-{available_drones}/5
+{drones}/5
 
 ✅ Profit Improvement:
 {improvement}%
