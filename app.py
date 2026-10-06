@@ -11,16 +11,15 @@ st.set_page_config(
 if "orders" not in st.session_state:
     st.session_state.orders = []
 
+# ------------------------------------------------
+# Functions
+# ------------------------------------------------
 
 def create_order(pizza_count, toppings, distance, drink):
 
-    revenue = pizza_count * (
-        60 + toppings * 10
-    )
+    revenue = pizza_count * (60 + toppings * 10)
 
-    cost = pizza_count * (
-        14 + toppings * 2
-    )
+    cost = pizza_count * (14 + toppings * 2)
 
     profit = revenue - cost
 
@@ -55,20 +54,24 @@ def run_demo():
     for _ in range(30):
 
         pizza_count = random.randint(1, 5)
+
         toppings = random.randint(0, 3)
+
         distance = random.randint(1, 15)
 
-        order = create_order(
-            pizza_count,
-            toppings,
-            distance,
-            "None"
-        )
-
         st.session_state.orders.append(
-            order
+            create_order(
+                pizza_count,
+                toppings,
+                distance,
+                "None"
+            )
         )
 
+
+# ------------------------------------------------
+# Header
+# ------------------------------------------------
 
 st.title("🍕 PizzaFlow AI")
 
@@ -76,11 +79,11 @@ st.info(
     """
 🎬 Quick Start
 
-1. Open Dashboard
-2. Click Run Demo Scenario
-3. Review AI recommendation
-4. Compare PizzaFlow AI against FIFO
-5. Review business outcome
+1. Open Dashboard.
+2. Click "Run Demo Scenario".
+3. Review the AI recommendation.
+4. Compare PizzaFlow AI against FIFO.
+5. Review the business outcome summary.
 """
 )
 
@@ -91,9 +94,9 @@ tab1, tab2 = st.tabs(
     ]
 )
 
-# ====================================
+# ==================================================
 # Orders
-# ====================================
+# ==================================================
 
 with tab1:
 
@@ -138,29 +141,27 @@ with tab1:
             )
         )
 
-        st.success(
-            "Order Created"
-        )
+        st.success("Order Created")
 
-# ====================================
+# ==================================================
 # Dashboard
-# ====================================
+# ==================================================
 
 with tab2:
 
     st.header("📊 Operations Dashboard")
 
-    c1, c2, c3 = st.columns(3)
+    b1, b2, b3 = st.columns(3)
 
-    with c1:
+    with b1:
         if st.button("🎬 Run Demo Scenario"):
             run_demo()
 
-    with c2:
+    with b2:
         if st.button("🚨 City Event"):
             run_demo()
 
-    with c3:
+    with b3:
         if st.button("🗑 Reset Simulation"):
             st.session_state.orders = []
             st.rerun()
@@ -195,8 +196,8 @@ with tab2:
         )
 
         busy_drones = min(
-            3,
-            int(len(df) / 10)
+            5,
+            int(len(df) / 6)
         )
 
         available_drones = 5 - busy_drones
@@ -219,6 +220,8 @@ with tab2:
             * 100,
             1
         )
+
+        # KPI
 
         k1, k2, k3, k4, k5, k6 = st.columns(6)
 
@@ -256,20 +259,20 @@ with tab2:
             """
 ### Order Prioritization Logic
 
-Priority = Profit ÷ ETA
+Orders are ranked using:
+
+**Priority = Profit ÷ ETA**
 
 Higher score = Higher priority
 """
         )
 
         st.dataframe(
-            df.head(10),
+            df,
             use_container_width=True
         )
 
-        st.caption(
-            f"Showing top 10 prioritized orders out of {len(df)}"
-        )
+        # AI recommendation
 
         st.success(
             f"""
@@ -290,6 +293,8 @@ Profit-to-ETA ratio while maximizing
 expected business value.
 """
         )
+
+        # FIFO comparison
 
         st.subheader(
             "📊 FIFO vs PizzaFlow AI"
@@ -321,9 +326,7 @@ expected business value.
                 f"{avg_eta:.1f}"
             )
 
-        
-            fig,
-            use_comparison_df = pd.DataFrame(
+        comparison_df = pd.DataFrame(
             {
                 "Strategy": [
                     "FIFO",
@@ -344,24 +347,26 @@ expected business value.
             title="Profit Comparison"
         )
 
-       st.plotly_chart(
-    fig,
-    use_container_width=True
-)
+        st.plotly_chart(
+            fig,
+            use_container_width=True
+        )
 
-st.success(
-    f"""
+        st.success(
+            f"""
 🚀 PizzaFlow AI improves profitability by
 {improvement}% compared to FIFO.
 """
-)
+        )
 
-st.subheader(
-    "📈 Business Outcome"
-)
+        # Business Outcome
 
-st.success(
-    f"""
+        st.subheader(
+            "📈 Business Outcome"
+        )
+
+        st.success(
+            f"""
 ✅ AI selected the highest-value order
 
 ✅ Expected Profit:
@@ -379,4 +384,4 @@ st.success(
 ✅ Profit Improvement:
 {improvement}%
 """
-)
+        )
