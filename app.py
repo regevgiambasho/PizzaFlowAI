@@ -321,7 +321,9 @@ expected business value.
                 f"{avg_eta:.1f}"
             )
 
-        comparison_df = pd.DataFrame(
+        
+            fig,
+            use_comparison_df = pd.DataFrame(
             {
                 "Strategy": [
                     "FIFO",
@@ -342,6 +344,39 @@ expected business value.
             title="Profit Comparison"
         )
 
-        st.plotly_chart(
-            fig,
-            use_
+       st.plotly_chart(
+    fig,
+    use_container_width=True
+)
+
+st.success(
+    f"""
+🚀 PizzaFlow AI improves profitability by
+{improvement}% compared to FIFO.
+"""
+)
+
+st.subheader(
+    "📈 Business Outcome"
+)
+
+st.success(
+    f"""
+✅ AI selected the highest-value order
+
+✅ Expected Profit:
+₪{int(best_order['Profit'])}
+
+✅ Expected ETA:
+{best_order['ETA']} Minutes
+
+✅ Oven C Status:
+{oven_c}
+
+✅ Available Drones:
+{available_drones}/5
+
+✅ Profit Improvement:
+{improvement}%
+"""
+)
